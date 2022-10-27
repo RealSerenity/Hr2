@@ -7,6 +7,7 @@ import com.rserenity.hrproject.data.entity.UserEntity;
 import org.springframework.http.ResponseEntity;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -14,9 +15,11 @@ public interface OffDayServices {
 
     public List<OffDayDto> getOffDays();
 
-    public OffDayDto createOffDay(Long userId) throws Throwable;
+    public ResponseEntity<Map<String, Boolean>> deleteOffDay(Long userId) throws Throwable;
 
-    public List<OffDayDto> getOffDaysByUser(UserEntity user) throws Throwable;
+    public OffDayDto createOffDay(Long userId, LocalDate date) throws Throwable;
+
+    public List<OffDayDto> getOffDaysByUser(UserDto user) throws Throwable;
 
     public ResponseEntity<OffDayDto> getOffDayById(Long id) throws Throwable;
 

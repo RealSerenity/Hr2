@@ -11,5 +11,5 @@ import java.util.Set;
 public interface OffDayRequestRepository extends JpaRepository<OffDayRequestEntity,Long> {
 
     @Query("SELECT t FROM OffDayRequestEntity t WHERE t.user = ?1")
-    Set<OffDayRequestEntity> getRequestsOfUser(UserEntity entity);
+    OffDayRequestEntity[] getRequestsOfUser(UserEntity entity);
 }

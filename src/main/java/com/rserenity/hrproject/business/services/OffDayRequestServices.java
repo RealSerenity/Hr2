@@ -14,6 +14,8 @@ public interface OffDayRequestServices {
 
     public List<OffDayRequestDto> getRequests();
 
+    public List<OffDayRequestDto> getWaitingRequests();
+
     public OffDayRequestDto createRequest(Long userId, LocalDate date) throws Throwable;
 
     public ResponseEntity<OffDayRequestDto> getRequestById(Long requestId) throws Throwable;

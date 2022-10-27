@@ -9,6 +9,7 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <link href="https://getbootstrap.com/docs/4.0/examples/signin/signin.css" rel="stylesheet" crossorigin="anonymous"/>
     <link  rel="stylesheet"  href="webjars/bootstrap/4.0.0-alpha.2/css/bootstrap.min.js">
+    <link rel="stylesheet" th:href="@{/css/style.css}" src="../static/js/main.js">
     <style>
         body{
             background-color: #3e3e3e;
@@ -20,29 +21,26 @@
         .accept {
             border-radius: 8px;
             color: #FFF;
-            background: #44CC44;
             padding: 15px 20px;
-            box-shadow: 0 4px 0 0 #2EA62E;
+            background: #44CC44;
         }
         .accept:hover {
             background: #6FE76F;
-            box-shadow: 0 4px 0 0 #7ED37E;
         }
         .deny {
             border-radius: 8px;
             color: #FFF;
             background: tomato;
             padding: 15px 20px;
-            box-shadow: 0 4px 0 0 #CB4949;
         }
         .deny:hover {
             background: rgb(255, 147, 128);
-            box-shadow: 0 4px 0 0 #EF8282;
         }
 
         th,td{
             color: black;
         }
+
     </style>
 </head>
 <body>
@@ -58,14 +56,13 @@
 
     <p th:text="'('+${admin.username}+')'"></p>
 
-
-
-
     <div class="card">
         <div class="card-block">
             <table class="table table-hover">
                 <thead>
                 <tr>
+                    <th th:text="'Id'"></th>
+                    <th th:text="'Username'"></th>
                     <th th:text="'Date'"></th>
                     <th th:text="'Accept'"></th>
                     <th th:text="'Deny'"></th>
@@ -74,21 +71,23 @@
                 <tbody>
 
                 <tr th:if="${requests.size() > 0}" th:each="temp:${requests}">
-                    <div th:if="${temp.getStatus().equals(T(com.rserenity.hrproject.security.auth.RequestStatus).Waiting)}">
+<!--                    <div th:if="${temp.getStatus().equals(T(com.rserenity.hrproject.security.auth.RequestStatus).Waiting)}">-->
 <!--                    <div th:if="${temp.getStatus()}==${T(com.rserenity.hrproject.security.auth.RequestStatus).Waiting}">-->
 
+                    <td th:text="${temp.getUserId()}"></td>
+                    <td th:text="${userServices.getUserById(temp.getUserId()).getBody().username}"></td>
                     <td th:text="${temp.getDate()}"></td>
-                    <form th:method="put" th:action="@{'/acceptRequest?requestId='+ ${temp.getId()}}">
+                    <form th:method="post" th:action="@{'/acceptRequest?requestId='+ ${temp.getId()}}">
                     <td>
-                        <button class="accept fa fa-check"></button>
+                        <button class="button-48 accept fa fa-close"></button>
                     </td>
                     </form>
-                    <form th:method="put" th:action="@{'/denyRequest?requestId='+ ${temp.getId()}}">
-                    <td>
-                        <button class="deny fa fa-close"></button>
+                    <form th:method="post" th:action="@{'/denyRequest?requestId='+ ${temp.getId()}}">
+                    <td >
+                        <button class="button-48 deny fa fa-close"></button>
                     </td>
                     </form>
-                    </div>
+<!--                    </div>-->
                 <tr/>
 
                 <tr th:unless="${requests.size() > 0}">

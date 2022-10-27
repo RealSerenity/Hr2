@@ -3,6 +3,7 @@ package com.rserenity.hrproject.business.services.impl;
 import com.rserenity.hrproject.Exception.ResourceNotFoundException;
 import com.rserenity.hrproject.business.dto.OffDayRequestDto;
 import com.rserenity.hrproject.business.services.OffDayRequestServices;
+import com.rserenity.hrproject.business.services.OffDayServices;
 import com.rserenity.hrproject.business.services.UserServices;
 import com.rserenity.hrproject.data.entity.OffDayRequestEntity;
 import com.rserenity.hrproject.data.repository.OffDayRequestRepository;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class OffDayRequestServiceImpl implements OffDayRequestServices {
@@ -28,6 +31,9 @@ public class OffDayRequestServiceImpl implements OffDayRequestServices {
     @Autowired
     UserServices userServices;
 
+    @Autowired
+    OffDayServices offDayServices;
+
 
     @Override
     public List<OffDayRequestDto> getRequests() {
@@ -35,9 +41,21 @@ public class OffDayRequestServiceImpl implements OffDayRequestServices {
         Iterable<OffDayRequestEntity> entityList= offDayRequestRepository.findAll();
         for(OffDayRequestEntity entity : entityList){
             OffDayRequestDto offDayDto = entityToDto(entity);
+            requests.add(offDayDto);
+        }
+        return requests;
+    }
 
-            if(offDayDto.getStatus().equals(RequestStatus.Waiting)) requests.add(offDayDto);
-
+    @Override
+    public List<OffDayRequestDto> getWaitingRequests() {
+        List<OffDayRequestDto> requests = new ArrayList<>();
+        Iterable<OffDayRequestEntity> entityList= offDayRequestRepository.findAll();
+        for(OffDayRequestEntity entity : entityList){
+            OffDayRequestDto offDayDto = entityToDto(entity);
+            if(offDayDto.getStatus() == RequestStatus.Waiting)
+            {
+                requests.add(offDayDto);
+            }
         }
         return requests;
     }
@@ -54,7 +72,7 @@ public class OffDayRequestServiceImpl implements OffDayRequestServices {
     }
 
     @Override
-    public ResponseEntity<OffDayRequestDto> getRequestById(Long requestId) throws Throwable {
+    public ResponseEntity<OffDayRequestDto> getRequestById(Long requestId) {
         OffDayRequestEntity entity = offDayRequestRepository.findById(requestId).orElseThrow(
                 ()-> new ResourceNotFoundException("Request not exist by given id " + requestId));
         OffDayRequestDto dto = entityToDto(entity);
@@ -64,8 +82,21 @@ public class OffDayRequestServiceImpl implements OffDayRequestServices {
     @Override
     public ResponseEntity<OffDayRequestDto> approveRequest(Long requestId) throws Throwable {
         OffDayRequestDto dto = getRequestById(requestId).getBody();
+        if(dto == null){
+            System.out.println("Null requestId !!!");
+            return null;
+        }
+        dto.setStatus(RequestStatus.Approved);
         OffDayRequestEntity entity = dtoToEntity(dto);
-        entity.setStatus(RequestStatus.Approved);
+
+        // checking user then creating off day according to the user
+        if(dto.getUserId() != null & entity.getUser().getId() != null){
+            offDayServices.createOffDay(dto.getUserId(), dto.getDate());
+            // success message
+        }else{
+            System.out.println();
+            // fail message
+        }
         offDayRequestRepository.save(entity);
         return ResponseEntity.ok(dto);
     }
@@ -73,17 +104,20 @@ public class OffDayRequestServiceImpl implements OffDayRequestServices {
     @Override
     public ResponseEntity<OffDayRequestDto> denyRequest(Long requestId) throws Throwable {
         OffDayRequestDto dto = getRequestById(requestId).getBody();
+        if(dto == null){
+            System.out.println("Null requestId !!!");
+            return null;
+        }
+        dto.setStatus(RequestStatus.Denied);
         OffDayRequestEntity entity = dtoToEntity(dto);
-        entity.setStatus(RequestStatus.Denied);
         offDayRequestRepository.save(entity);
         return ResponseEntity.ok(dto);
     }
 
     @Override
     public List<OffDayRequestDto> getRequestsOfUserId(Long userId) throws Throwable {
-        return offDayRequestRepository.getRequestsOfUser(userServices.dtoToEntity(userServices.getUserById(userId).getBody()))
-                .stream()
-                .map(this::entityToDto).toList();
+        OffDayRequestEntity[] entities = offDayRequestRepository.getRequestsOfUser(userServices.dtoToEntity(userServices.getUserById(userId).getBody()));
+        return Arrays.stream(entities).map(this::entityToDto).toList();
     }
 
     @Override

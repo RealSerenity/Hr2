@@ -8,15 +8,13 @@ import com.rserenity.hrproject.security.Session.JSessionDto;
 import com.rserenity.hrproject.security.Session.JSessionServices;
 import com.rserenity.hrproject.security.auth.ApplicationUserRole;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/")
@@ -42,13 +40,13 @@ public class TemplateController {
     }
 
     @PostMapping("/loginUser")
-    public String loginPost(HttpServletRequest request, @ModelAttribute UserDto userDto, RedirectAttributes redirectAttributes) {
+    public String loginPost(HttpServletRequest request, @ModelAttribute UserDto userDto) {
         createSession(request.getSession().getId(), userDto.getUsername());
         UserDto user = userServices.loadUserDtoByUsername(userDto.getUsername());
         //employee
         if(user.getGrantedAuthorities().contains(new SimpleGrantedAuthority("ROLE_"+ApplicationUserRole.EMPLOYEE.name())))
         {
-            return "redirect:/offdays";
+            return "redirect:/userPanel";
         }
         //admin-admintrainee
         else{
@@ -57,31 +55,37 @@ public class TemplateController {
     }
 
     // @CurrentSecurityContext(expression="authentication") Authentication authenticatio
-    @GetMapping("/offdays")
-    public String getOffdays(Model model, HttpServletRequest request) throws Throwable {
+    @GetMapping("/userPanel")
+    public String userPanel(Model model, HttpServletRequest request) throws Throwable {
+//        if(checkSessionIsValid(request)) return "redirect:/login";
         UserDto user = userServices.getUserById(jSessionServices.findByJSessionId(request.getSession().getId()).getUserId()).getBody();
-
         model.addAttribute("user", user);
-        model.addAttribute("offdays", offDayServices.getOffDaysByUser(userServices.dtoToEntity(user)));
-        System.out.println(offDayServices.getOffDaysByUser(userServices.dtoToEntity(user)).size());
-        return "offdays";
+        model.addAttribute("offdays", offDayServices.getOffDaysByUser(user));
+        model.addAttribute("offdayrequests", offDayRequestServices.getRequestsOfUserId(user.getId()));
+//        model.addAttribute("offdayrequests", offDayRequestServices.getRequestsOfUserId(Objects.requireNonNull(user).getId()));
+
+        System.out.println(offDayServices.getOffDaysByUser(user).size());
+        return "userPanel";
     }
 
     @GetMapping("/adminPanel")
     public String adminPanel(Model model, HttpServletRequest request) throws Throwable {
+        if(checkSessionIsValid(request)) return "redirect:/login";
+
         UserDto admin = userServices.getUserById(jSessionServices.findByJSessionId(request.getSession().getId()).getUserId()).getBody();
         model.addAttribute("admin", admin);
-        System.out.println("Requests -> " + offDayRequestServices.getRequests().size());
-        model.addAttribute("requests",offDayRequestServices.getRequests());
+        model.addAttribute("userServices", userServices);
+        model.addAttribute("requests",offDayRequestServices.getWaitingRequests());
         return "adminPanel";
     }
 
-    private void createSession(String jsessionId, String username) {
-        JSessionDto jSessionDto = jSessionServices.createJSession(JSessionDto.builder()
-                .jSessionId(jsessionId)
-                .userId(userServices.loadUserDtoByUsername(username).getId())
-                .build());
-        System.out.println("created session -> " + jSessionDto);
+    @PostMapping("/createRequest")
+    public String createRequest(HttpServletRequest request, @RequestParam(name = "date") LocalDate date) throws Throwable {
+        UserDto user = userServices.getUserById(jSessionServices.findByJSessionId(request.getSession().getId()).getUserId()).getBody();
+        if (user != null) {
+            offDayRequestServices.createRequest(user.getId(),date);
+        }
+        return "redirect:/adminPanel";
     }
 
 
@@ -99,4 +103,15 @@ public class TemplateController {
         return "redirect:/adminPanel";
     }
 
+    private void createSession(String jsessionId, String username) {
+        JSessionDto jSessionDto = jSessionServices.createJSession(JSessionDto.builder()
+                .jSessionId(jsessionId)
+                .userId(userServices.loadUserDtoByUsername(username).getId())
+                .build());
+        System.out.println("created session -> " + jSessionDto);
+    }
+
+    private boolean checkSessionIsValid(HttpServletRequest request){
+        return jSessionServices.findByJSessionId(request.getSession().getId()) != null;
+    }
 }

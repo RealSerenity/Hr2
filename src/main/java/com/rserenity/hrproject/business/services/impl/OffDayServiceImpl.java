@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class OffDayServiceImpl implements OffDayServices {
@@ -45,24 +42,29 @@ public class OffDayServiceImpl implements OffDayServices {
     }
 
     @Override
-    public OffDayDto createOffDay(Long userId) throws Throwable {
+    public ResponseEntity<Map<String, Boolean>> deleteOffDay(Long id) throws Throwable {
+        OffDayEntity entity = (OffDayEntity) offDayRepository.findById(id).orElseThrow(
+                ()-> new ResourceNotFoundException("Off-day not exist by given id " + id));
+        offDayRepository.delete(entity);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public OffDayDto createOffDay(Long userId, LocalDate date) throws Throwable {
         OffDayEntity entity = new OffDayEntity();
         entity.setUser(userServices.dtoToEntity(userServices.getUserById(userId).getBody()));
-        entity.setDay(LocalDate.now());
+        entity.setDay(date);
         offDayRepository.save(entity);
         return entityToDto(entity);
     }
 
     @Override
-    public List<OffDayDto> getOffDaysByUser(UserEntity user) throws Throwable {
-        Set set = offDayRepository.findAllByUser(user);
-        List<OffDayDto> arrayList = new ArrayList<>();
-        arrayList =  set.stream().toList();
-//        while (resultSet.next()) {
-//            System.out.println("result set -> " + resultSet.getLong(0));
-//            arrayList.add(getOffDayById(resultSet.getLong(0)).getBody());
-//        }
-        return arrayList;
+    public List<OffDayDto> getOffDaysByUser(UserDto user) throws Throwable {
+        UserEntity entity = userServices.dtoToEntity(user);
+        OffDayEntity[] entities = offDayRepository.findAllByUser(entity);
+        return Arrays.stream(entities).map(this::entityToDto).toList();
     }
 
     @Override

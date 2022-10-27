@@ -27,10 +27,10 @@ import java.util.concurrent.TimeUnit;
 
 import static com.rserenity.hrproject.security.auth.ApplicationUserRole.*;
 
-@EnableWebSecurity
-@Configuration
+//@EnableWebSecurity
+//@Configuration
 // for @PreAuthorize()
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -102,10 +102,10 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(daoAuthenticationProvider());
-    }
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.authenticationProvider(daoAuthenticationProvider());
+//    }
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(){

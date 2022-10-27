@@ -4,11 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,9 +35,6 @@ public class UserEntity extends BaseEntity{
     @OneToMany(mappedBy = "user")
     private Set<OffDayRequestEntity> offDayRequests = new HashSet<>();
 
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "user")
-//    private Set<OffDayEntity> offDays = new HashSet<>();
 
     @ElementCollection
     @Column(name = "authorities")
@@ -57,4 +52,11 @@ public class UserEntity extends BaseEntity{
     @Column(name = "isEnabled")
     private boolean isEnabled;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity entity = (UserEntity) o;
+        return this.getId() == entity.getId();
+    }
 }

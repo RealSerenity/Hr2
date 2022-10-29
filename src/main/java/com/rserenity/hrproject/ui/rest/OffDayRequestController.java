@@ -1,20 +1,15 @@
 package com.rserenity.hrproject.ui.rest;
 
-import com.rserenity.hrproject.Exception.ResourceNotFoundException;
-import com.rserenity.hrproject.business.dto.OffDayDto;
 import com.rserenity.hrproject.business.dto.OffDayRequestDto;
 import com.rserenity.hrproject.business.services.OffDayRequestServices;
-import com.rserenity.hrproject.data.entity.OffDayRequestEntity;
-import com.rserenity.hrproject.security.auth.RequestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Formatter;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/requests")
@@ -39,10 +34,15 @@ public class OffDayRequestController {
         return offDayRequestServices.createRequest(userId, date);
     }
 
+    @DeleteMapping("/deleteRequest/{id}")
+    public ResponseEntity<Map<String, Boolean>> deleteRequest(@PathVariable Long id) throws Throwable {
+        return offDayRequestServices.deleteRequest(id);
+    }
 
     @GetMapping("/getRequests/user/{id}")
     public List<OffDayRequestDto> getRequestsById(@PathVariable Long id) throws Throwable {
-        return offDayRequestServices.getRequestsOfUserId(id);
+//        return offDayRequestServices.getRequestsOfUserId(id);
+        return offDayRequestServices.findAllofIdOrderByDateDesc(id);
     }
 
     @GetMapping("/getRequest/{id}")

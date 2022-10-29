@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserServices {
     @Override
     public ResponseEntity<Map<String, Boolean>> deleteUser(Long id) throws Throwable {
         UserEntity userEntity = (UserEntity) userRepository.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Employee not exist by given id " + id));
+                ()-> new ResourceNotFoundException("User not exist by given id " + id));
         userRepository.delete(userEntity);
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);

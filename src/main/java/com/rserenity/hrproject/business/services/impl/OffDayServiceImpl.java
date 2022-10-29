@@ -2,26 +2,24 @@ package com.rserenity.hrproject.business.services.impl;
 
 import com.rserenity.hrproject.Exception.ResourceNotFoundException;
 import com.rserenity.hrproject.business.dto.OffDayDto;
+import com.rserenity.hrproject.business.dto.OffDayRequestDto;
 import com.rserenity.hrproject.business.dto.UserDto;
 import com.rserenity.hrproject.business.services.OffDayServices;
 import com.rserenity.hrproject.business.services.UserServices;
 import com.rserenity.hrproject.data.entity.OffDayEntity;
 import com.rserenity.hrproject.data.entity.UserEntity;
 import com.rserenity.hrproject.data.repository.OffDayRepository;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
+@Log4j2
 public class OffDayServiceImpl implements OffDayServices {
 
     @Autowired
@@ -45,24 +43,36 @@ public class OffDayServiceImpl implements OffDayServices {
     }
 
     @Override
-    public OffDayDto createOffDay(Long userId) throws Throwable {
+    public ResponseEntity<Map<String, Boolean>> deleteOffDay(Long id) throws Throwable {
+        OffDayEntity entity = (OffDayEntity) offDayRepository.findById(id).orElseThrow(
+                ()-> new ResourceNotFoundException("Off-day not exist by given id " + id));
+        offDayRepository.delete(entity);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public OffDayDto createOffDay(Long userId, LocalDate date) throws Throwable {
         OffDayEntity entity = new OffDayEntity();
         entity.setUser(userServices.dtoToEntity(userServices.getUserById(userId).getBody()));
-        entity.setDay(LocalDate.now());
+        entity.setDate(date);
         offDayRepository.save(entity);
+        log.info("new Off-day created -> " + entity);
+        System.out.println("dto -> " + entityToDto(entity));
         return entityToDto(entity);
     }
 
     @Override
-    public List<OffDayDto> getOffDaysByUser(UserEntity user) throws Throwable {
-        Set set = offDayRepository.findAllByUser(user);
-        List<OffDayDto> arrayList = new ArrayList<>();
-        arrayList =  set.stream().toList();
-//        while (resultSet.next()) {
-//            System.out.println("result set -> " + resultSet.getLong(0));
-//            arrayList.add(getOffDayById(resultSet.getLong(0)).getBody());
-//        }
-        return arrayList;
+    public ResponseEntity<OffDayRequestDto> getRequestById(Long requestId) throws Throwable {
+        return null;
+    }
+
+    @Override
+    public List<OffDayDto> getOffDaysByUser(UserDto user) throws Throwable {
+        UserEntity entity = userServices.dtoToEntity(user);
+        OffDayEntity[] entities = offDayRepository.getAllOfUser(entity);
+        return Arrays.stream(entities).map(this::entityToDto).toList();
     }
 
     @Override
@@ -76,6 +86,7 @@ public class OffDayServiceImpl implements OffDayServices {
     @Override
     public OffDayDto entityToDto(OffDayEntity offDayEntity) {
         OffDayDto dto = modelMapper.map(offDayEntity, OffDayDto.class);
+        dto.setDate(offDayEntity.getDate());
         dto.setUserId(offDayEntity.getUser().getId());
         return dto;
     }
@@ -84,6 +95,7 @@ public class OffDayServiceImpl implements OffDayServices {
     public OffDayEntity dtoToEntity(OffDayDto offDayDto) throws Throwable {
         OffDayEntity entity = modelMapper.map(offDayDto, OffDayEntity.class);
         entity.setUser(userServices.dtoToEntity(userServices.getUserById(offDayDto.getUserId()).getBody()));
+        entity.setDate(offDayDto.getDate());
         return entity;
     }
 }

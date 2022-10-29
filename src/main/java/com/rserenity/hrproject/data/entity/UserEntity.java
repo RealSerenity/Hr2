@@ -37,9 +37,6 @@ public class UserEntity extends BaseEntity{
     @OneToMany(mappedBy = "user")
     private Set<OffDayRequestEntity> offDayRequests = new HashSet<>();
 
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "user")
-//    private Set<OffDayEntity> offDays = new HashSet<>();
 
     @ElementCollection
     @Column(name = "authorities")
@@ -57,4 +54,11 @@ public class UserEntity extends BaseEntity{
     @Column(name = "isEnabled")
     private boolean isEnabled;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity entity = (UserEntity) o;
+        return this.getId() == entity.getId();
+    }
 }

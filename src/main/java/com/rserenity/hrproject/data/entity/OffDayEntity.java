@@ -6,7 +6,6 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Date;
 
 @NoArgsConstructor
 @Log4j2
@@ -20,7 +19,7 @@ public class OffDayEntity {
     @Column(name = "id",nullable = false)
     private Long id;
     @Column(name = "date",nullable = false)
-    private LocalDate day;
+    private LocalDate date;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id", referencedColumnName = "id")

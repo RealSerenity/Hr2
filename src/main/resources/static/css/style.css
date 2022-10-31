@@ -55,3 +55,38 @@
     z-index: 1;
     position: relative;
 }
+
+.form-container {
+    border-radius: 8px;
+    min-width: 250px;
+    max-width: 600px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: lightskyblue;
+    position: absolute;
+    text-align: center;
+    align-items: center;
+}
+.form-container .customform-item{
+    width: 80%;
+    margin-left: 10%;
+}
+
+.form-container #cancelbtn{
+    background-color: red;
+}
+
+.form-container .btn {
+    padding-left: 10%;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 80%;
+    margin-bottom:10px;
+    opacity: 0.8;
+}
+
+.form-container .btn:hover, .open-button:hover {
+    opacity: 1;
+}

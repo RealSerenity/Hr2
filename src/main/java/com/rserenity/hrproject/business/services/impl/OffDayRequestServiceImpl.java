@@ -2,10 +2,12 @@ package com.rserenity.hrproject.business.services.impl;
 
 import com.rserenity.hrproject.Exception.ResourceNotFoundException;
 import com.rserenity.hrproject.business.dto.OffDayRequestDto;
+import com.rserenity.hrproject.business.dto.UserDto;
 import com.rserenity.hrproject.business.services.OffDayRequestServices;
 import com.rserenity.hrproject.business.services.OffDayServices;
 import com.rserenity.hrproject.business.services.UserServices;
 import com.rserenity.hrproject.data.entity.OffDayRequestEntity;
+import com.rserenity.hrproject.data.entity.UserEntity;
 import com.rserenity.hrproject.data.repository.OffDayRequestRepository;
 import com.rserenity.hrproject.security.auth.RequestStatus;
 import org.modelmapper.ModelMapper;
@@ -13,11 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.time.ZoneId;
+import java.util.*;
 
 @Service
 public class OffDayRequestServiceImpl implements OffDayRequestServices {
@@ -59,6 +60,16 @@ public class OffDayRequestServiceImpl implements OffDayRequestServices {
         }
         return requests;
     }
+
+    @Override
+    public ResponseEntity<Map<String, Boolean>> deleteRequest(Long id) throws Throwable {
+        OffDayRequestEntity entity = dtoToEntity(getRequestById(id).getBody());
+        offDayRequestRepository.delete(entity);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+        return ResponseEntity.ok(response);
+    }
+
 
     @Override
     public OffDayRequestDto createRequest(Long userId, LocalDate date) throws Throwable {
@@ -114,11 +125,11 @@ public class OffDayRequestServiceImpl implements OffDayRequestServices {
         return ResponseEntity.ok(dto);
     }
 
-    @Override
-    public List<OffDayRequestDto> getRequestsOfUserId(Long userId) throws Throwable {
-        OffDayRequestEntity[] entities = offDayRequestRepository.getRequestsOfUser(userServices.dtoToEntity(userServices.getUserById(userId).getBody()));
-        return Arrays.stream(entities).map(this::entityToDto).toList();
-    }
+//    @Override
+//    public List<OffDayRequestDto> getRequestsOfUserId(Long userId) throws Throwable {
+//        OffDayRequestEntity[] entities = offDayRequestRepository.getRequestsOfUser(userServices.dtoToEntity(userServices.getUserById(userId).getBody()));
+//        return Arrays.stream(entities).map(this::entityToDto).toList();
+//    }
 
     @Override
     public OffDayRequestDto entityToDto(OffDayRequestEntity offDayRequest) {
@@ -132,5 +143,12 @@ public class OffDayRequestServiceImpl implements OffDayRequestServices {
         OffDayRequestEntity entity = modelMapper.map(offDayRequest, OffDayRequestEntity.class);
         entity.setUser(userServices.dtoToEntity(userServices.getUserById(offDayRequest.getUserId()).getBody()));
         return entity;
+    }
+
+    @Override
+    public List<OffDayRequestDto> findAllofIdOrderByDateDesc(Long id) throws Throwable {
+        UserEntity entity = userServices.dtoToEntity(userServices.getUserById(id).getBody());
+        List<OffDayRequestEntity> entities = offDayRequestRepository.findOffDayRequestEntitiesByUserOrderByRequestDateDescIdDesc(entity);
+        return entities.stream().map(this::entityToDto).toList();
     }
 }

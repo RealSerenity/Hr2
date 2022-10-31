@@ -8,6 +8,7 @@
     <title>Please sign in</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <link href="https://getbootstrap.com/docs/4.0/examples/signin/signin.css" rel="stylesheet" crossorigin="anonymous"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}" src="../static/js/main.js">
     <style>
         body{
             background-color: #3e3e3e;
@@ -18,6 +19,17 @@
             color: black;
         }
     </style>
+
+    <script  th:inline="javascript">
+        function openForm() {
+            document.getElementById("myForm").style.display = "block";
+        }
+
+        function closeForm() {
+            document.getElementById("myForm").style.display = "none";
+        }
+    </script>
+
 </head>
 <body>
 <div class="container">
@@ -30,7 +42,7 @@
     <p th:text="${user.username}"></p>
 
     <div class="container">
-
+        <a class="btn btn-primary eBtn" th:onclick="openForm()" id="button" th:text="'Request Off-Day'"></a>
 
         <div class="card">
             <h1 style="float: left;color: black" th:text="'Off-days'"></h1>
@@ -38,16 +50,18 @@
                 <table class="table table-hover">
                     <thead>
                     <tr>
+                        <th th:text="'Id'"></th>
                         <th th:text="'Date'"></th>
                     </tr>
                     </thead>
                     <tbody>
 
-                    <tr th:if="${offdays.size() > 0}" th:each="temp:${offdays}">
+                    <tr th:if="${offDays.size() > 0}" th:each="temp:${offDays}">
+                        <td th:text="${temp.getId()}"></td>
                         <td th:text="${temp.getDate()}"></td>
                     <tr/>
 
-                    <tr th:unless="${offdays.size() > 0}" th:each="temp:${offdays}">
+                    <tr th:unless="${offDays.size() > 0}" th:each="temp:${offDays}">
                         <td  th:text="'0 off-days'"></td>
                     <tr/>
 
@@ -70,18 +84,20 @@
                 <table class="table table-hover">
                     <thead>
                     <tr>
+                        <th th:text="'Id'"></th>
                         <th th:text="'Date'"></th>
                         <th th:text="'Status'"></th>
                     </tr>
                     </thead>
                     <tbody>
 
-                    <tr th:if="${offdayrequests.size() > 0}" th:each="temp:${offdayrequests}">
+                    <tr th:if="${offDayRequests.size() > 0}" th:each="temp:${offDayRequests}">
+                        <td th:text="${temp.getId()}"></td>
                         <td th:text="${temp.getDate()}"></td>
                         <td th:text="${temp.getStatus()}"></td>
                     <tr/>
 
-                    <tr th:unless="${offdays.size() > 0}" th:each="temp:${offdays}">
+                    <tr th:unless="${offDayRequests.size() > 0}" th:each="temp:${offDayRequests}">
                         <td  th:text="'0 off-days'"></td>
                     <tr/>
 
@@ -96,6 +112,21 @@
                 <!--                </ul>-->
             </div>
         </div>
+
+        <div id="myForm" style="display: none" class="form-container">
+            <form th:action="@{'/createRequest?userId=' + ${user.getId()} + '&date='+ ${offDayRequest.date}}" th:method="post" th:object="${offDayRequest}">
+                <h2 th:text="'Send Off-Day Request'"></h2>
+                <div class="form-group">
+                    <label for="date" class="col-form-label" th:text="'Date'"></label><br>
+                    <input type="date" th:attr="min=${today}" id="date" th:field="*{date}">
+                </div>
+                <!--  <p class="text-danger" th:if="${nullBankId != null}" th:text="${nullBankId}"></p>-->
+                <br>
+                <button type="submit" class="btn btn-primary">Send</button><br>
+                <button type="button" class="btn btn-primary" id="cancelbtn" onclick="closeForm()" th:text="'Close'"></button>
+            </form>
+        </div>
+
     </div>
 
 

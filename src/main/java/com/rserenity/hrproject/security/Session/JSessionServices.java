@@ -14,8 +14,6 @@ public interface JSessionServices{
 
     public JSessionDto createJSession(JSessionDto jSessionDto);
 
-    public ResponseEntity<JSessionDto> getJSessionById(Long id) throws Throwable;
-
     JSessionEntity findByJSessionId(String sessionId);
 
     public JSessionDto entityToDto(JSessionEntity jSessionEntity);

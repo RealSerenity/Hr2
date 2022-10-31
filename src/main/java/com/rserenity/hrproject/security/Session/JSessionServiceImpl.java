@@ -62,14 +62,8 @@ public class JSessionServiceImpl implements JSessionServices{
     }
 
     @Override
-    public ResponseEntity<JSessionDto> getJSessionById(Long id) throws Throwable {
-        return null;
-    }
-
-    @Override
     public JSessionEntity findByJSessionId(String sessionId) {
         JSessionEntity entity = jSessionRepository.findByJSessionId(sessionId);
-        System.out.println(entity);
         return entity;
     }
 
